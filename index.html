@@ -7,509 +7,285 @@
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --black: #0a0a0a;
+      --black: #111111;
       --white: #ffffff;
+      --gray-50: #fafafa;
       --gray-100: #f4f4f4;
-      --gray-200: #e2e2e2;
+      --gray-200: #e5e5e5;
       --gray-400: #999;
       --gray-600: #555;
-      --gray-800: #222;
+      --gray-800: #333;
     }
-
-    html, body {
-      width: 100%; height: 100%;
-      font-family: 'DM Sans', sans-serif;
-      background: #111;
-      overflow: hidden;
-    }
-
-    #deck {
-      width: 100vw;
-      height: 100vh;
-      position: relative;
-      overflow: hidden;
-    }
+    html, body { width:100%; height:100%; font-family:'DM Sans',sans-serif; background:#fff; overflow:hidden; }
+    #deck { width:100vw; height:100vh; position:relative; overflow:hidden; }
 
     .slide {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.45s ease, transform 0.45s ease;
+      position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center;
+      opacity:0; pointer-events:none;
+      transition: opacity .45s ease, transform .45s ease;
       transform: translateX(60px);
-      padding: 6vh 7vw;
+      padding: 7vh 7vw;
+      background: var(--white);
+      color: var(--black);
     }
-    .slide.active { opacity: 1; pointer-events: all; transform: translateX(0); }
-    .slide.exit { opacity: 0; transform: translateX(-60px); }
+    .slide.active  { opacity:1; pointer-events:all; transform:translateX(0); }
+    .slide.exit    { opacity:0; transform:translateX(-60px); }
+    .slide-soft    { background: var(--gray-50); }
+    .slide-private { background: #f7f7f7; }
 
-    .slide-dark  { background: var(--black); color: var(--white); }
-    .slide-light { background: var(--white); color: var(--black); }
-    .slide-gray  { background: #111; color: var(--white); }
-    .slide-private { background: #0d0d0d; color: var(--white); }
+    /* Slide number */
+    .slide-num { position:absolute; top:3vh; right:3vw; font-size:12px; font-weight:300; color:var(--gray-400); letter-spacing:.1em; }
 
-    /* PRIVATE badge */
+    /* Private badge */
     .private-badge {
-      position: absolute;
-      top: 3vh; left: 3vw;
-      display: flex; align-items: center; gap: 8px;
-      background: #1a1a1a;
-      border: 1px solid #2a2a2a;
-      padding: 6px 14px;
-      font-size: 11px;
-      color: #666;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
+      position:absolute; top:3vh; left:7vw;
+      display:flex; align-items:center; gap:8px;
+      background:#efefef; border:1px solid #ddd;
+      padding:5px 14px; font-size:11px; color:var(--gray-600);
+      letter-spacing:.1em; text-transform:uppercase;
     }
-    .private-badge span { color: #555; font-size: 14px; }
 
-    /* Slide number top-right */
-    .slide-num {
-      position: absolute;
-      top: 3vh; right: 3vw;
-      font-size: 13px;
-      font-weight: 300;
-      color: #333;
-      letter-spacing: 0.1em;
-    }
-    .slide-light .slide-num { color: #bbb; }
+    /* Logo */
+    .logo-img { position:fixed; top:2.5vh; left:3vw; height:28px; z-index:999; opacity:0.85; }
 
     /* Typography */
     .eyebrow {
-      font-size: clamp(10px, 1.1vw, 12px);
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--gray-400);
-      margin-bottom: 2vh;
+      font-size:clamp(9px,1vw,11px); letter-spacing:.18em; text-transform:uppercase;
+      color:var(--gray-400); margin-bottom:2vh; font-weight:400;
     }
-    .slide-light .eyebrow { color: var(--gray-600); }
-
     .title {
-      font-family: 'IBM Plex Sans', serif;
-      font-style: italic;
-      font-weight: 300;
-      font-size: clamp(30px, 4.8vw, 64px);
-      line-height: 1.1;
-      letter-spacing: -0.01em;
+      font-family:'IBM Plex Sans',serif; font-style:italic; font-weight:300;
+      font-size:clamp(28px,4.5vw,60px); line-height:1.1; letter-spacing:-.01em; color:var(--black);
     }
-    .title em { font-style: normal; font-weight: 600; }
+    .title em { font-style:normal; font-weight:600; }
+    .subtitle { font-size:clamp(13px,1.4vw,18px); font-weight:300; color:var(--gray-600); margin-top:2vh; max-width:55vw; line-height:1.55; }
+    .divider { width:36px; height:1px; background:var(--gray-200); margin:2.5vh 0; }
 
-    .subtitle {
-      font-size: clamp(14px, 1.5vw, 19px);
-      font-weight: 300;
-      color: var(--gray-400);
-      margin-top: 2vh;
-      max-width: 55vw;
-      line-height: 1.55;
-    }
-    .slide-light .subtitle { color: var(--gray-600); }
+    /* Grid cells */
+    .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--gray-200); margin-top:3vh; border:1px solid var(--gray-200); }
+    .grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--gray-200); margin-top:3vh; border:1px solid var(--gray-200); }
+    .cell { background:var(--white); padding:2.8vh 2.2vw; }
+    .cell-soft { background:var(--gray-50); }
+    .cell-num { font-family:'IBM Plex Sans',serif; font-style:italic; font-size:11px; color:var(--gray-400); margin-bottom:1.2vh; }
+    .cell-title { font-size:clamp(13px,1.3vw,15px); font-weight:500; color:var(--black); margin-bottom:.5vh; }
+    .cell-desc { font-size:clamp(10px,1.05vw,13px); font-weight:300; color:var(--gray-600); line-height:1.5; }
 
-    /* Questions list (private slide) */
-    .q-list {
-      margin-top: 3vh;
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-      max-width: 72vw;
-    }
-    .q-row {
-      display: grid;
-      grid-template-columns: 28px 1fr;
-      gap: 1.5vw;
-      align-items: start;
-      padding: 2vh 0;
-      border-bottom: 1px solid #1a1a1a;
-    }
-    .q-row:first-child { border-top: 1px solid #1a1a1a; }
-    .q-num { font-size: 11px; color: #444; padding-top: 3px; }
-    .q-text { font-size: clamp(14px, 1.45vw, 18px); font-weight: 300; color: #ccc; line-height: 1.5; }
-    .q-text strong { color: var(--white); font-weight: 500; }
-    .q-sub { font-size: 12px; color: #444; margin-top: 4px; font-style: italic; }
-
-    /* Pain / constat grid */
-    .pain-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1px;
-      background: var(--gray-200);
-      margin-top: 3vh;
-      border: 1px solid var(--gray-200);
-    }
-    .slide-dark .pain-grid, .slide-gray .pain-grid { background: #1c1c1c; border-color: #1c1c1c; }
-    .pain-cell {
-      background: var(--white);
-      padding: 3vh 2.2vw;
-    }
-    .slide-dark .pain-cell, .slide-gray .pain-cell { background: #111; }
-    .pain-num { font-family: 'IBM Plex Sans', serif; font-style: italic; font-size: 11px; color: var(--gray-400); margin-bottom: 1.2vh; }
-    .pain-title { font-size: clamp(13px, 1.3vw, 16px); font-weight: 500; color: var(--black); margin-bottom: 0.5vh; }
-    .slide-dark .pain-title, .slide-gray .pain-title { color: var(--white); }
-    .pain-desc { font-size: clamp(11px, 1.05vw, 13px); font-weight: 300; color: var(--gray-600); line-height: 1.5; }
-    .slide-dark .pain-desc, .slide-gray .pain-desc { color: #666; }
-
-    /* Callout box */
-    .callout {
-      margin-top: 3vh;
-      padding: 2.5vh 2.5vw;
-      background: var(--gray-800);
-      color: var(--white);
-      font-size: clamp(14px, 1.5vw, 18px);
-      font-weight: 400;
-      line-height: 1.5;
-      max-width: 68vw;
-      border-left: 3px solid #555;
-    }
-    .slide-light .callout { background: #111; border-left-color: #444; }
-
-    /* Deliverables grid */
-    .deliv-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1px;
-      background: #1c1c1c;
-      margin-top: 3vh;
-      border: 1px solid #1c1c1c;
-    }
-    .deliv-cell { background: #111; padding: 2.5vh 2vw; }
-    .deliv-cell.dark-feature { background: #181818; }
-    .deliv-num { font-size: 10px; letter-spacing: 0.12em; color: #3a3a3a; margin-bottom: 1vh; }
-    .deliv-title { font-size: clamp(13px, 1.25vw, 15px); font-weight: 500; color: var(--white); margin-bottom: 0.4vh; }
-    .deliv-desc { font-size: clamp(10px, 1vw, 12px); font-weight: 300; color: #666; line-height: 1.45; }
-
-    /* Big stat */
-    .big-stat { 
-      font-family: 'IBM Plex Sans', serif;
-      font-weight: 600;
-      font-size: clamp(56px, 10vw, 130px);
-      line-height: 1;
-      letter-spacing: -0.04em;
-    }
-    .big-stat-label {
-      font-size: clamp(12px, 1.3vw, 16px);
-      font-weight: 300;
-      color: #555;
-      margin-top: 0.8vh;
-    }
-
-    /* Price section */
-    .price-block {
-      margin-top: 3.5vh;
-      max-width: 56vw;
-    }
-    .price-main {
-      display: flex;
-      align-items: baseline;
-      gap: 1.5vw;
-      padding: 3.5vh 3vw;
-      background: var(--black);
-      border: 1px solid #222;
-    }
-    .slide-light .price-main { background: #f7f7f7; border-color: var(--gray-200); }
-    .price-amount {
-      font-size: clamp(48px, 6.5vw, 80px);
-      font-weight: 600;
-      letter-spacing: -0.04em;
-    }
-    .slide-light .price-amount { color: var(--black); }
-    .price-detail { font-size: clamp(13px, 1.3vw, 16px); font-weight: 300; color: #555; line-height: 1.6; }
-    .price-note {
-      margin-top: 1.2vh;
-      padding: 1.8vh 3vw;
-      background: #141414;
-      font-size: 12px;
-      color: #444;
-      font-weight: 300;
-    }
-    .slide-light .price-note { background: var(--gray-100); color: var(--gray-600); }
-
-    /* Phase 2 tease */
-    .tease-strip {
-      margin-top: 2.5vh;
-      padding: 2.2vh 3vw;
-      background: #0d0d0d;
-      border: 1px solid #1a1a1a;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      max-width: 56vw;
-    }
-    .tease-left { font-size: clamp(13px, 1.3vw, 16px); font-weight: 300; color: #444; }
-    .tease-label { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #333; margin-bottom: 4px; }
-    .tease-right { font-family: 'IBM Plex Sans', serif; font-style: italic; font-size: clamp(18px, 2vw, 24px); font-weight: 300; color: #333; text-align: right; }
-
-    /* Steps (CTA) */
-    .step-list { margin-top: 3vh; max-width: 58vw; }
-    .step-row {
-      display: grid;
-      grid-template-columns: 28px 1fr;
-      gap: 2vw;
-      padding: 2.2vh 0;
-      border-bottom: 1px solid #1a1a1a;
-    }
-    .step-row:first-child { border-top: 1px solid #1a1a1a; }
-    .step-n { font-size: 11px; color: #444; padding-top: 3px; }
-    .step-body { font-size: clamp(13px, 1.4vw, 17px); font-weight: 300; color: #ccc; }
-    .step-body strong { color: var(--white); font-weight: 500; }
-
-    /* Objection handler */
-    .obj-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1px;
-      background: #1c1c1c;
-      margin-top: 3.5vh;
-      border: 1px solid #1c1c1c;
-    }
-    .obj-cell { background: #111; padding: 2.5vh 2.5vw; }
-    .obj-q { font-size: clamp(12px, 1.2vw, 15px); font-weight: 500; color: #888; margin-bottom: 1vh; }
-    .obj-a { font-size: clamp(13px, 1.3vw, 15px); font-weight: 300; color: #ccc; line-height: 1.55; }
-    .obj-a strong { color: var(--white); }
+    /* Callout */
+    .callout { margin-top:3vh; padding:2.5vh 2.5vw; background:var(--gray-100); border-left:3px solid var(--gray-800); font-size:clamp(13px,1.4vw,17px); font-weight:300; color:var(--gray-800); line-height:1.55; max-width:68vw; }
+    .callout strong { font-weight:600; color:var(--black); }
 
     /* Two col */
-    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 6vw; align-items: center; height: 100%; }
-    .col-l, .col-r { display: flex; flex-direction: column; justify-content: center; }
+    .two-col { display:grid; grid-template-columns:1fr 1fr; gap:6vw; align-items:center; height:100%; }
+    .col-l, .col-r { display:flex; flex-direction:column; justify-content:center; }
 
-    /* Divider */
-    .divider { width: 40px; height: 1px; background: #2a2a2a; margin: 2.5vh 0; }
-    .slide-light .divider { background: var(--gray-200); }
+    /* Questions (private) */
+    .q-list { margin-top:3vh; max-width:74vw; }
+    .q-row { display:grid; grid-template-columns:26px 1fr; gap:1.5vw; padding:2vh 0; border-bottom:1px solid var(--gray-200); }
+    .q-row:first-child { border-top:1px solid var(--gray-200); }
+    .q-num { font-size:11px; color:var(--gray-400); padding-top:3px; }
+    .q-text { font-size:clamp(13px,1.4vw,17px); font-weight:300; color:var(--gray-800); line-height:1.5; }
+    .q-text strong { color:var(--black); font-weight:500; }
+    .q-sub { font-size:12px; color:var(--gray-400); margin-top:5px; font-style:italic; }
 
-    /* NAV */
+    /* Price */
+    .price-block { margin-top:3.5vh; max-width:54vw; }
+    .price-main { display:flex; align-items:baseline; gap:2vw; padding:3.5vh 3vw; background:var(--gray-50); border:1px solid var(--gray-200); }
+    .price-amount { font-size:clamp(44px,6vw,76px); font-weight:600; letter-spacing:-.04em; color:var(--black); }
+    .price-detail { font-size:clamp(12px,1.3vw,16px); font-weight:300; color:var(--gray-600); line-height:1.6; }
+    .price-note { margin-top:1px; padding:1.8vh 3vw; background:var(--gray-100); font-size:12px; color:var(--gray-600); font-weight:300; }
+    .tease-strip { margin-top:2.5vh; padding:2.2vh 3vw; background:var(--gray-100); border:1px solid var(--gray-200); display:flex; align-items:center; justify-content:space-between; max-width:54vw; }
+    .tease-label { font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--gray-400); margin-bottom:4px; }
+    .tease-left { font-size:clamp(12px,1.2vw,15px); font-weight:300; color:var(--gray-600); }
+    .tease-right { font-family:'IBM Plex Sans',serif; font-style:italic; font-size:clamp(16px,1.8vw,22px); font-weight:300; color:var(--gray-400); text-align:right; }
+
+    /* Objections */
+    .obj-grid { display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--gray-200); margin-top:3.5vh; border:1px solid var(--gray-200); }
+    .obj-cell { background:var(--white); padding:2.5vh 2.5vw; }
+    .obj-q { font-size:clamp(11px,1.1vw,14px); font-weight:500; color:var(--gray-600); margin-bottom:1vh; font-style:italic; }
+    .obj-a { font-size:clamp(12px,1.2vw,15px); font-weight:300; color:var(--gray-800); line-height:1.55; }
+    .obj-a strong { color:var(--black); font-weight:500; }
+
+    /* Steps */
+    .step-list { margin-top:3vh; max-width:58vw; }
+    .step-row { display:grid; grid-template-columns:26px 1fr; gap:2vw; padding:2.2vh 0; border-bottom:1px solid var(--gray-200); }
+    .step-row:first-child { border-top:1px solid var(--gray-200); }
+    .step-n { font-size:11px; color:var(--gray-400); padding-top:3px; }
+    .step-body { font-size:clamp(13px,1.35vw,17px); font-weight:300; color:var(--gray-800); }
+    .step-body strong { color:var(--black); font-weight:500; }
+
+    /* Nav */
     #nav {
-      position: fixed; bottom: 3vh; left: 50%; transform: translateX(-50%);
-      display: flex; align-items: center; gap: 12px; z-index: 999;
-      background: rgba(10,10,10,0.9); backdrop-filter: blur(12px);
-      padding: 10px 20px; border: 1px solid #1e1e1e;
+      position:fixed; bottom:3vh; left:50%; transform:translateX(-50%);
+      display:flex; align-items:center; gap:12px; z-index:999;
+      background:rgba(255,255,255,.92); backdrop-filter:blur(12px);
+      padding:10px 20px; border:1px solid var(--gray-200);
     }
-    .dot { width: 5px; height: 5px; border-radius: 50%; background: #2a2a2a; cursor: pointer; transition: background 0.2s, transform 0.2s; }
-    .dot.active { background: var(--white); transform: scale(1.4); }
-    .nav-btn { background: none; border: none; color: #555; font-size: 17px; cursor: pointer; padding: 0 4px; transition: color 0.2s; }
-    .nav-btn:hover { color: var(--white); }
-    .slide-counter { font-size: 11px; color: #444; letter-spacing: 0.06em; min-width: 32px; text-align: center; }
-
-    /* LOGO */
-    .logo {
-      position: fixed; top: 3vh; left: 3vw;
-      font-family: 'IBM Plex Sans', serif; font-style: italic; font-weight: 300;
-      font-size: 13px; color: #444; z-index: 999; letter-spacing: 0.02em;
-    }
-    .logo strong { font-style: normal; font-weight: 400; color: #555; }
+    .dot { width:5px; height:5px; border-radius:50%; background:var(--gray-200); cursor:pointer; transition:background .2s, transform .2s; }
+    .dot.active { background:var(--black); transform:scale(1.4); }
+    .nav-btn { background:none; border:none; color:var(--gray-400); font-size:17px; cursor:pointer; padding:0 4px; transition:color .2s; }
+    .nav-btn:hover { color:var(--black); }
+    .slide-counter { font-size:11px; color:var(--gray-400); letter-spacing:.06em; min-width:32px; text-align:center; }
   </style>
 </head>
 <body>
 
-<span class="logo"><strong>NovaFlow</strong> Media</span>
+<img class="logo-img" src="data:image/png;base64,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AIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAAiBGAAAAAAAACACAEYAAAAAAAAIEIABgAAAAAAAIgQgAEAAAAAAAB+NPwfMtoo9a4bCAYAAAAASUVORK5CYII=" alt="NovaFlow Media" />
 
 <div id="deck">
 
-  <!-- ========================================================= -->
-  <!-- SLIDE 0 — PRIVATE : DISCOVERY QUESTIONS (toi seulement) -->
-  <!-- ========================================================= -->
+  <!-- SLIDE 00 — PRIVÉE -->
   <div class="slide slide-private active" data-slide="0">
-    <div class="private-badge"><span>🔒</span> Slide privée — toi uniquement</div>
+    <div class="private-badge">🔒 Slide privée — toi uniquement</div>
     <div class="slide-num">00</div>
-
-    <p class="eyebrow" style="margin-top: 6vh;">Qualification · Questions de découverte</p>
-    <h2 class="title" style="font-size: clamp(24px, 3vw, 40px); color: #888;">
-      Pose ces questions <em style="color: white;">avant</em> d'ouvrir la diapo.
-    </h2>
-
+    <p class="eyebrow" style="margin-top:6vh;">Qualification · Questions de découverte</p>
+    <h2 class="title" style="font-size:clamp(22px,2.8vw,38px);">Pose ces questions <em>avant</em> d'ouvrir la présentation.</h2>
     <div class="q-list">
       <div class="q-row">
         <span class="q-num">01</span>
         <div>
           <p class="q-text"><strong>« Aujourd'hui tu trouves tes clients comment ? »</strong></p>
-          <p class="q-sub">→ S'il dit "réseau / bouche à oreille" : parfait, c'est notre angle. Si déjà actif en ligne : creuser ce qui marche ou pas.</p>
+          <p class="q-sub">→ "Réseau / bouche à oreille" = il n'a aucun système en ligne. C'est notre angle.</p>
         </div>
       </div>
       <div class="q-row">
         <span class="q-num">02</span>
         <div>
-          <p class="q-text"><strong>« Si tu ouvres ton Instagram maintenant — t'en es content ? »</strong></p>
-          <p class="q-sub">→ Laisser le silence. Il va se qualifier lui-même. "Non" = douleur active.</p>
+          <p class="q-text"><strong>« Tu as un compte Instagram professionnel ? Si oui, t'en es content ? »</strong></p>
+          <p class="q-sub">→ Si non ou vide : douleur active. S'il n'en a pas du tout, Phase 1 est la réponse évidente.</p>
         </div>
       </div>
       <div class="q-row">
         <span class="q-num">03</span>
         <div>
-          <p class="q-text"><strong>« Est-ce que des prospects t'ont déjà trouvé via les réseaux sans que tu les aies contactés ? »</strong></p>
-          <p class="q-sub">→ Si "non" : c'est le gap. Il perd des leads tous les jours sans s'en rendre compte.</p>
+          <p class="q-text"><strong>« Des prospects t'ont-ils déjà trouvé seuls via les réseaux, sans que tu les aies contactés ? »</strong></p>
+          <p class="q-sub">→ Si "non" : il perd des leads chaque semaine sans s'en rendre compte.</p>
         </div>
       </div>
       <div class="q-row">
         <span class="q-num">04</span>
         <div>
-          <p class="q-text"><strong>« Si dans 6 mois ton Instagram attirait 2-3 rendez-vous qualifiés par mois en inbound — ça changerait quoi pour toi ? »</strong></p>
-          <p class="q-sub">→ Le faire verbaliser. C'est lui qui ferme la vente, pas toi. Note le chiffre ou la réponse émotionnelle.</p>
+          <p class="q-text"><strong>« Si dans 6 mois ton Instagram amenait 2-3 RDV qualifiés par mois en automatique — ça changerait quoi ? »</strong></p>
+          <p class="q-sub">→ Le faire verbaliser. Il ferme la vente lui-même. Note la réponse émotionnelle.</p>
         </div>
       </div>
       <div class="q-row">
         <span class="q-num">05</span>
         <div>
           <p class="q-text"><strong>« Qu'est-ce qui t'a empêché de t'y mettre jusqu'ici ? »</strong></p>
-          <p class="q-sub">→ Les réponses classiques : "pas le temps", "je sais pas quoi poster", "j'ai essayé mais…". C'est ton pitch qui répond à ça.</p>
+          <p class="q-sub">→ "Pas le temps", "je sais pas quoi poster", "j'ai essayé". La présentation répond exactement à ça.</p>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ====================================== -->
-  <!-- SLIDE 1 — COVER -->
-  <!-- ====================================== -->
-  <div class="slide slide-dark" data-slide="1">
+  <!-- SLIDE 01 — COVER -->
+  <div class="slide" data-slide="1">
     <div class="slide-num">01</div>
-    <p class="eyebrow" style="margin-top: 4vh;">NovaFlow Media · 2026</p>
-    <h1 style="font-family:'IBM Plex Sans',serif; font-style:italic; font-weight:300; font-size:clamp(38px,6vw,82px); line-height:1.06; letter-spacing:-0.02em; max-width:80vw; color:var(--white);">
-      Ton Instagram,<br>de vitrine vide à<br><strong style="font-style:normal; font-weight:600;">machine à prospects.</strong>
+    <p class="eyebrow">NovaFlow Media · 2026</p>
+    <h1 class="title" style="font-size:clamp(36px,5.5vw,76px); max-width:75vw;">
+      Ton Instagram, de<br>vitrine vide à <em>machine<br>à prospects.</em>
     </h1>
     <div class="divider"></div>
-    <p style="font-size:clamp(13px,1.4vw,17px); font-weight:300; color:#555; max-width:50vw; line-height:1.5;">
-      Un système complet. Done For You.<br>Tu filmes. On s'occupe du reste.
+    <p class="subtitle">
+      Un système complet. Done For You.<br>
+      Tu n'as pas Instagram. Dans 30 jours, tu en as un qui travaille pour toi.
     </p>
   </div>
 
-  <!-- ====================================== -->
-  <!-- SLIDE 2 — LE PROBLÈME (miroir douleur) -->
-  <!-- ====================================== -->
-  <div class="slide slide-light" data-slide="2">
+  <!-- SLIDE 02 — LE PROBLÈME -->
+  <div class="slide slide-soft" data-slide="2">
     <div class="slide-num">02</div>
-    <p class="eyebrow">La réalité</p>
+    <p class="eyebrow">La réalité aujourd'hui</p>
     <h2 class="title">Ton expertise est réelle.<br>Mais <em>personne ne la voit.</em></h2>
-
-    <div class="pain-grid">
-      <div class="pain-cell">
-        <p class="pain-num">01</p>
-        <p class="pain-title">Tu travailles dur. Zéro inbound.</p>
-        <p class="pain-desc">Chaque client, tu l'as cherché. Le jour où tu t'arrêtes de prospecter — tout s'arrête.</p>
+    <div class="grid-3">
+      <div class="cell">
+        <p class="cell-num">01</p>
+        <p class="cell-title">Tu travailles dur. Zéro inbound.</p>
+        <p class="cell-desc">Chaque client, tu l'as cherché. Le jour où tu t'arrêtes de prospecter — tout s'arrête.</p>
       </div>
-      <div class="pain-cell">
-        <p class="pain-num">02</p>
-        <p class="pain-title">Ton profil ne vend pas ta crédibilité</p>
-        <p class="pain-desc">En 5 secondes, un prospect qui tombe sur ton profil ne comprend pas ce que tu fais, ni pourquoi toi.</p>
+      <div class="cell">
+        <p class="cell-num">02</p>
+        <p class="cell-title">Ton expertise est invisible en ligne</p>
+        <p class="cell-desc">Sans profil, un prospect qui te cherche sur Google ou Instagram ne te trouve pas. Tu n'existes pas.</p>
       </div>
-      <div class="pain-cell">
-        <p class="pain-num">03</p>
-        <p class="pain-title">Tes concurrents prennent de l'avance</p>
-        <p class="pain-desc">Dans 12 mois, les conseillers qui postent aujourd'hui auront une audience. Toi tu seras encore au point de départ.</p>
+      <div class="cell">
+        <p class="cell-num">03</p>
+        <p class="cell-title">Tes concurrents prennent de l'avance</p>
+        <p class="cell-desc">Dans 12 mois, les conseillers qui commencent aujourd'hui auront une audience. Toi, tu seras encore au point zéro.</p>
       </div>
     </div>
-
     <div class="callout">
-      Ce n'est pas un problème de talent. C'est un problème de <strong>visibilité systémique</strong>.<br>
-      Et ça, c'est exactement ce qu'on règle.
+      Ce n'est pas un problème de talent. C'est un problème de <strong>visibilité</strong>.<br>
+      Et ça, c'est exactement ce qu'on règle — en 30 jours, Done For You.
     </div>
   </div>
 
-  <!-- ====================================== -->
-  <!-- SLIDE 3 — LA TRANSFORMATION (vision) -->
-  <!-- ====================================== -->
-  <div class="slide slide-dark" data-slide="3">
+  <!-- SLIDE 03 — LA TRANSFORMATION -->
+  <div class="slide" data-slide="3">
     <div class="slide-num">03</div>
     <div class="two-col">
       <div class="col-l">
-        <p class="eyebrow">Ce qu'on construit ensemble</p>
+        <p class="eyebrow">Ce qu'on construit</p>
         <h2 class="title">Dans 30 jours,<br>ton compte<br><em>travaille pour toi.</em></h2>
         <div class="divider"></div>
         <p class="subtitle">Tu n'as plus à expliquer qui tu es.<br>Ton Instagram le fait à ta place — 24h/24.</p>
       </div>
       <div class="col-r">
-        <div style="display:flex; flex-direction:column; gap:1px;">
-          <div style="background:#141414; padding:2.2vh 2vw; border-bottom:1px solid #1e1e1e;">
-            <p style="font-size:clamp(13px,1.3vw,16px); font-weight:500; color:var(--white); margin-bottom:4px;">Avant</p>
-            <p style="font-size:clamp(11px,1.1vw,14px); font-weight:300; color:#555; line-height:1.5;">Profil vide ou incohérent. Zéro prospect inbound. Prospection 100% manuelle.</p>
+        <div style="display:flex; flex-direction:column; gap:1px; border:1px solid var(--gray-200);">
+          <div style="background:var(--gray-100); padding:2.2vh 2vw; border-bottom:1px solid var(--gray-200);">
+            <p style="font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--gray-400); margin-bottom:6px;">Avant</p>
+            <p style="font-size:clamp(12px,1.2vw,15px); font-weight:300; color:var(--gray-600); line-height:1.5;">Pas de profil. Zéro présence en ligne. Prospection 100% manuelle et énergivore.</p>
           </div>
-          <div style="background:#141414; padding:2.2vh 2vw;">
-            <p style="font-size:clamp(13px,1.3vw,16px); font-weight:500; color:var(--white); margin-bottom:4px;">Après Phase 1</p>
-            <p style="font-size:clamp(11px,1.1vw,14px); font-weight:300; color:#ccc; line-height:1.5;">Profil repositionné. 18 posts prêts. Bio qui convertit. Socle pour attirer les bons prospects.</p>
+          <div style="background:var(--white); padding:2.2vh 2vw; border-bottom:1px solid var(--gray-200);">
+            <p style="font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--gray-400); margin-bottom:6px;">Après Phase 1</p>
+            <p style="font-size:clamp(12px,1.2vw,15px); font-weight:300; color:var(--gray-800); line-height:1.5;">Profil positionné. 18 posts prêts. Bio qui convertit. Base solide pour attirer des prospects.</p>
           </div>
-        </div>
-
-        <div style="margin-top:2vh; padding:2.5vh 2vw; background:#0d0d0d; border:1px solid #1a1a1a;">
-          <p style="font-size:11px; text-transform:uppercase; letter-spacing:0.12em; color:#333; margin-bottom:8px;">Résultat visé · 30 jours</p>
-          <p style="font-family:'IBM Plex Sans',serif; font-style:italic; font-weight:300; font-size:clamp(16px,1.8vw,22px); color:#aaa; line-height:1.4;">Un Instagram qui reflète<br>enfin qui tu es vraiment.</p>
+          <div style="background:var(--gray-50); padding:2.5vh 2vw;">
+            <p style="font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--gray-400); margin-bottom:8px;">Résultat · 30 jours</p>
+            <p style="font-family:'IBM Plex Sans',serif; font-style:italic; font-weight:300; font-size:clamp(15px,1.6vw,20px); color:var(--gray-800); line-height:1.4;">Un Instagram qui reflète enfin<br>qui tu es vraiment.</p>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ====================================== -->
-  <!-- SLIDE 4 — PHASE 1 LIVRABLES -->
-  <!-- ====================================== -->
-  <div class="slide slide-gray" data-slide="4">
+  <!-- SLIDE 04 — LIVRABLES -->
+  <div class="slide slide-soft" data-slide="4">
     <div class="slide-num">04</div>
     <p class="eyebrow">Phase 1 · Done For You · 30 jours</p>
-    <h2 class="title" style="font-size:clamp(24px,3.2vw,44px);">
-      Tu nous envoies tes photos.<br><em>On s'occupe du reste.</em>
+    <h2 class="title" style="font-size:clamp(22px,3vw,42px);">
+      Tu envoies tes photos.<br><em>On s'occupe du reste.</em>
     </h2>
-
-    <div class="deliv-grid">
-      <div class="deliv-cell">
-        <p class="deliv-num">01</p>
-        <p class="deliv-title">Stratégie d'image</p>
-        <p class="deliv-desc">PDF complet — positionnement, image à projeter, plan de contenu.</p>
-      </div>
-      <div class="deliv-cell">
-        <p class="deliv-num">02</p>
-        <p class="deliv-title">Nouvelle bio</p>
-        <p class="deliv-desc">Repositionnée pour convertir visiteurs en prospects en 3 secondes.</p>
-      </div>
-      <div class="deliv-cell">
-        <p class="deliv-num">03</p>
-        <p class="deliv-title">Story Highlights × 4</p>
-        <p class="deliv-desc">Mon Parcours · Témoignages · Ce que je fais · Contacte-moi</p>
-      </div>
-      <div class="deliv-cell">
-        <p class="deliv-num">04</p>
-        <p class="deliv-title">18 posts prêts</p>
-        <p class="deliv-desc">2 semaines de contenu pour relancer la dynamique dès le premier jour.</p>
-      </div>
-      <div class="deliv-cell">
-        <p class="deliv-num">05</p>
-        <p class="deliv-title">9 vidéos montées</p>
-        <p class="deliv-desc">Extraites d'un podcast ou tournage guidé. 100% monté par nous.</p>
-      </div>
-      <div class="deliv-cell">
-        <p class="deliv-num">06</p>
-        <p class="deliv-title">9 carrousels</p>
-        <p class="deliv-desc">Ton expertise mise en scène. Autorité + confiance dès le premier scroll.</p>
-      </div>
-      <div class="deliv-cell">
-        <p class="deliv-num">07</p>
-        <p class="deliv-title">Audit des anciens posts</p>
-        <p class="deliv-desc">On garde ce qui renforce, on supprime ce qui nuit.</p>
-      </div>
-      <div class="deliv-cell dark-feature" style="display:flex; align-items:center; justify-content:center; padding:3vh 2vw;">
-        <p style="font-family:'IBM Plex Sans',serif; font-style:italic; font-weight:300; font-size:clamp(18px,2vw,26px); color:#777; text-align:center; line-height:1.3;">Ton seul travail :<br><span style="color:#aaa;">envoyer tes photos.</span></p>
+    <div class="grid-4">
+      <div class="cell"><p class="cell-num">01</p><p class="cell-title">Stratégie d'image</p><p class="cell-desc">PDF complet — positionnement, image à projeter, plan de contenu.</p></div>
+      <div class="cell"><p class="cell-num">02</p><p class="cell-title">Nouvelle bio</p><p class="cell-desc">Repositionnée pour convertir les visiteurs en prospects en 3 secondes.</p></div>
+      <div class="cell"><p class="cell-num">03</p><p class="cell-title">Story Highlights × 4</p><p class="cell-desc">Mon Parcours · Témoignages · Ce que je fais · Contacte-moi</p></div>
+      <div class="cell"><p class="cell-num">04</p><p class="cell-title">18 posts prêts</p><p class="cell-desc">2 semaines de contenu pour démarrer avec une dynamique forte.</p></div>
+      <div class="cell"><p class="cell-num">05</p><p class="cell-title">9 vidéos montées</p><p class="cell-desc">Extraites d'un tournage guidé. 100% monté par nous.</p></div>
+      <div class="cell"><p class="cell-num">06</p><p class="cell-title">9 carrousels</p><p class="cell-desc">Ton expertise mise en scène. Autorité + confiance dès le premier scroll.</p></div>
+      <div class="cell"><p class="cell-num">07</p><p class="cell-title">Audit de départ</p><p class="cell-desc">On définit ton positionnement, ton ton, et ta cible avant de créer quoi que ce soit.</p></div>
+      <div class="cell cell-soft" style="display:flex; align-items:center; justify-content:center;">
+        <p style="font-family:'IBM Plex Sans',serif; font-style:italic; font-weight:300; font-size:clamp(16px,1.8vw,22px); color:var(--gray-600); text-align:center; line-height:1.3;">Ton seul travail :<br><span style="color:var(--black); font-weight:400;">envoyer tes photos.</span></p>
       </div>
     </div>
   </div>
 
-  <!-- ====================================== -->
-  <!-- SLIDE 5 — PRIX PHASE 1 -->
-  <!-- ====================================== -->
-  <div class="slide slide-light" data-slide="5">
+  <!-- SLIDE 05 — PRIX -->
+  <div class="slide" data-slide="5">
     <div class="slide-num">05</div>
     <p class="eyebrow">Investissement · Phase 1</p>
-    <h2 class="title" style="margin-bottom:3.5vh;">
-      Un investissement.<br><em>Une transformation.</em>
-    </h2>
-
+    <h2 class="title" style="margin-bottom:3.5vh;">Un investissement.<br><em>Une transformation.</em></h2>
     <div class="price-block">
       <div class="price-main">
         <span class="price-amount">CHF 3'500</span>
         <div class="price-detail">
           Phase 1 · Done For You<br>
-          <span style="font-size:12px; color:#777;">Stratégie · Rebranding · Contenu · Vidéos · Carrousels</span>
+          <span style="font-size:12px; color:var(--gray-400);">Stratégie · Rebranding · Contenu · Vidéos · Carrousels</span>
         </div>
       </div>
-      <div class="price-note">
-        Paiement en une fois · Démarrage sous 48h après confirmation · Livrables sous 30 jours
-      </div>
+      <div class="price-note">Paiement en une fois · Démarrage sous 48h · Livrables sous 30 jours</div>
     </div>
-
     <div class="tease-strip">
       <div>
         <p class="tease-label">Phase 2 — à venir</p>
@@ -517,55 +293,44 @@
       </div>
       <p class="tease-right">On en parle<br>après Phase 1 →</p>
     </div>
-
-    <p style="margin-top:2.5vh; font-size:12px; color:#bbb; font-weight:300; max-width:50vw; line-height:1.6;">
+    <p style="margin-top:2vh; font-size:12px; color:var(--gray-400); max-width:50vw; line-height:1.6;">
       La Phase 2 est réservée aux clients Phase 1 qui veulent aller plus loin.<br>
-      <strong>Mais on commence ici. Un mois. Des résultats concrets.</strong>
+      <strong style="color:var(--gray-800);">Mais on commence ici. 30 jours. Des résultats concrets.</strong>
     </p>
   </div>
 
-  <!-- ====================================== -->
-  <!-- SLIDE 6 — OBJECTIONS -->
-  <!-- ====================================== -->
-  <div class="slide slide-dark" data-slide="6">
+  <!-- SLIDE 06 — OBJECTIONS -->
+  <div class="slide slide-soft" data-slide="6">
     <div class="slide-num">06</div>
     <p class="eyebrow">Questions fréquentes</p>
-    <h2 class="title" style="font-size:clamp(24px,3.5vw,48px);">
-      Ce qui bloque souvent.<br><em>Et ce qu'on répond.</em>
-    </h2>
-
-    <div class="obj-grid" style="margin-top:3vh;">
+    <h2 class="title" style="font-size:clamp(22px,3.2vw,44px);">Ce qui bloque souvent.<br><em>Et ce qu'on répond.</em></h2>
+    <div class="obj-grid">
       <div class="obj-cell">
         <p class="obj-q">« J'ai pas le temps de créer du contenu. »</p>
         <p class="obj-a"><strong>C'est exactement pour ça qu'on existe.</strong> Tu n'as pas besoin de savoir créer. Tu filmes 30 minutes. On produit tout.</p>
       </div>
       <div class="obj-cell">
-        <p class="obj-q">« J'ai déjà essayé, ça n'a pas marché. »</p>
-        <p class="obj-a"><strong>Poster sans stratégie, ça ne marche pas.</strong> Ce qu'on fait c'est construire un système — pas juste publier des photos.</p>
+        <p class="obj-q">« Je sais pas quoi poster, je suis pas influenceur. »</p>
+        <p class="obj-a"><strong>Tu n'as pas besoin d'être influenceur.</strong> On définit ta stratégie de contenu — tu n'as qu'à exécuter selon notre brief.</p>
       </div>
       <div class="obj-cell">
         <p class="obj-q">« CHF 3'500 c'est beaucoup. »</p>
-        <p class="obj-a"><strong>Un seul client converti via Instagram = souvent 3x cet investissement.</strong> La vraie question : combien ça te coûte de rester invisible ?</p>
+        <p class="obj-a"><strong>Un seul client converti via Instagram = souvent 3× cet investissement.</strong> La vraie question : combien ça te coûte de rester invisible ?</p>
       </div>
       <div class="obj-cell">
         <p class="obj-q">« Je veux réfléchir. »</p>
-        <p class="obj-a"><strong>Réfléchir, oui. Attendre, non.</strong> Dans 30 jours tu pourrais avoir un profil transformé. Ou en être encore au même point.</p>
+        <p class="obj-a"><strong>Réfléchir, oui. Attendre, non.</strong> Dans 30 jours tu pourrais avoir un profil transformé — ou être encore au même point.</p>
       </div>
     </div>
   </div>
 
-  <!-- ====================================== -->
-  <!-- SLIDE 7 — CTA / CLOSING -->
-  <!-- ====================================== -->
-  <div class="slide slide-dark" data-slide="7">
+  <!-- SLIDE 07 — CTA CLOSING -->
+  <div class="slide" data-slide="7">
     <div class="slide-num">07</div>
     <p class="eyebrow">Prochaines étapes</p>
-    <h2 class="title">
-      On démarre quand<br><em>tu dis go.</em>
-    </h2>
+    <h2 class="title">On démarre quand<br><em>tu dis go.</em></h2>
     <div class="divider"></div>
     <p class="subtitle">Tout est prêt de notre côté. Il manque juste ta confirmation.</p>
-
     <div class="step-list">
       <div class="step-row">
         <span class="step-n">01</span>
@@ -573,28 +338,26 @@
       </div>
       <div class="step-row">
         <span class="step-n">02</span>
-        <span class="step-body"><strong>Call de démarrage · 30 min</strong> — on aligne la vision et les accès.</span>
+        <span class="step-body"><strong>Call de démarrage · 30 min</strong> — on aligne la vision, les accès, le positionnement.</span>
       </div>
       <div class="step-row">
         <span class="step-n">03</span>
-        <span class="step-body"><strong>Tu envoies tes photos + accès Instagram</strong> — on prend tout en main.</span>
+        <span class="step-body"><strong>Tu envoies tes photos</strong> — on prend tout en main dès réception.</span>
       </div>
       <div class="step-row">
         <span class="step-n">04</span>
-        <span class="step-body"><strong>Dans 30 jours</strong> — profil transformé. Contenu prêt. Tu démarres Phase 2 si tu veux aller plus loin.</span>
+        <span class="step-body"><strong>Dans 30 jours</strong> — profil transformé, contenu prêt, Instagram qui travaille pour toi.</span>
       </div>
     </div>
-
-    <p style="margin-top:4vh; font-size:11px; color:#2a2a2a; letter-spacing:0.12em; text-transform:uppercase;">Antoine & Elio · NovaFlow Media</p>
+    <p style="margin-top:4vh; font-size:11px; color:var(--gray-400); letter-spacing:.12em; text-transform:uppercase;">Antoine & Elio · NovaFlow Media</p>
   </div>
 
-</div><!-- /deck -->
+</div>
 
-<!-- NAV -->
 <div id="nav">
   <button class="nav-btn" id="prevBtn">←</button>
   <div id="dots"></div>
-  <span class="slide-counter" id="counter">0 / 7</span>
+  <span class="slide-counter" id="counter">🔒</span>
   <button class="nav-btn" id="nextBtn">→</button>
 </div>
 
@@ -603,39 +366,31 @@
   const dotsEl = document.getElementById('dots');
   const counter = document.getElementById('counter');
   let cur = 0;
-
   slides.forEach((_, i) => {
     const d = document.createElement('div');
-    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.className = 'dot' + (i===0?' active':'');
     d.addEventListener('click', () => goTo(i));
     dotsEl.appendChild(d);
   });
-
   function goTo(n) {
-    if (n < 0 || n >= slides.length) return;
-    slides[cur].classList.remove('active');
-    slides[cur].classList.add('exit');
-    const old = cur; cur = n;
-    setTimeout(() => slides[old].classList.remove('exit'), 460);
+    if (n<0||n>=slides.length) return;
+    slides[cur].classList.remove('active'); slides[cur].classList.add('exit');
+    const old=cur; cur=n;
+    setTimeout(()=>slides[old].classList.remove('exit'),460);
     slides[cur].classList.add('active');
-    document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
-    // Show "00" for private slide, else normal
-    const slideNum = slides[cur].dataset.slide;
-    counter.textContent = slideNum === '0' ? '🔒 Private' : `${String(parseInt(slideNum)).padStart(2,'0')} / 07`;
+    document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===cur));
+    const sn = slides[cur].dataset.slide;
+    counter.textContent = sn==='0' ? '🔒 Private' : `${String(parseInt(sn)).padStart(2,'0')} / 07`;
   }
-
-  document.getElementById('prevBtn').addEventListener('click', () => goTo(cur - 1));
-  document.getElementById('nextBtn').addEventListener('click', () => goTo(cur + 1));
-  document.addEventListener('keydown', e => {
-    if (e.key === 'ArrowRight' || e.key === ' ') goTo(cur + 1);
-    if (e.key === 'ArrowLeft') goTo(cur - 1);
+  document.getElementById('prevBtn').addEventListener('click',()=>goTo(cur-1));
+  document.getElementById('nextBtn').addEventListener('click',()=>goTo(cur+1));
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key===' ') goTo(cur+1);
+    if(e.key==='ArrowLeft') goTo(cur-1);
   });
-  let tx = 0;
-  document.addEventListener('touchstart', e => tx = e.touches[0].clientX);
-  document.addEventListener('touchend', e => {
-    const dx = tx - e.changedTouches[0].clientX;
-    if (Math.abs(dx) > 50) goTo(cur + (dx > 0 ? 1 : -1));
-  });
+  let tx=0;
+  document.addEventListener('touchstart',e=>tx=e.touches[0].clientX);
+  document.addEventListener('touchend',e=>{const dx=tx-e.changedTouches[0].clientX; if(Math.abs(dx)>50) goTo(cur+(dx>0?1:-1));});
 </script>
 </body>
 </html>
