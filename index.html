@@ -377,6 +377,58 @@
     <p style="margin-top:4vh; font-size:11px; color:var(--gray-400); letter-spacing:.12em; text-transform:uppercase;">Antoine & Elio · NovaFlow Media</p>
   </div>
 
-</div>  <!-- SLIDE 06 — PRIX -->
-  
+</div>
+
 </div><!-- /deck -->
+
+<div id="nav" style="position:fixed; bottom:3vh; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:12px; z-index:999; background:rgba(255,255,255,.92); backdrop-filter:blur(12px); padding:10px 20px; border:1px solid #e5e5e5;">
+  <button class="nav-btn" id="prevBtn">&#8592;</button>
+  <div id="dots"></div>
+  <span id="counter" style="font-size:11px; color:#999; letter-spacing:.06em; min-width:60px; text-align:center;">&#128274;</span>
+  <button class="nav-btn" id="nextBtn">&#8594;</button>
+</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const dotsEl = document.getElementById('dots');
+  const counter = document.getElementById('counter');
+  let cur = 0;
+
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.style.cssText = 'width:5px;height:5px;border-radius:50%;background:#e5e5e5;cursor:pointer;transition:background .2s,transform .2s;display:inline-block;margin:0 2px;';
+    if (i === 0) { d.style.background = '#111'; d.style.transform = 'scale(1.4)'; }
+    d.addEventListener('click', () => goTo(i));
+    dotsEl.appendChild(d);
+  });
+
+  function goTo(n) {
+    if (n < 0 || n >= slides.length) return;
+    slides[cur].classList.remove('active');
+    slides[cur].classList.add('exit');
+    const old = cur; cur = n;
+    setTimeout(() => slides[old].classList.remove('exit'), 460);
+    slides[cur].classList.add('active');
+    dotsEl.querySelectorAll('div').forEach((d, i) => {
+      d.style.background = i === cur ? '#111' : '#e5e5e5';
+      d.style.transform = i === cur ? 'scale(1.4)' : 'scale(1)';
+    });
+    const sn = slides[cur].dataset.slide;
+    counter.textContent = sn === '0' ? '\u{1F512} Private' : String(parseInt(sn)).padStart(2,'0') + ' / 07';
+  }
+
+  document.getElementById('prevBtn').addEventListener('click', () => goTo(cur - 1));
+  document.getElementById('nextBtn').addEventListener('click', () => goTo(cur + 1));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') goTo(cur + 1);
+    if (e.key === 'ArrowLeft') goTo(cur - 1);
+  });
+  let tx = 0;
+  document.addEventListener('touchstart', e => tx = e.touches[0].clientX);
+  document.addEventListener('touchend', e => {
+    const dx = tx - e.changedTouches[0].clientX;
+    if (Math.abs(dx) > 50) goTo(cur + (dx > 0 ? 1 : -1));
+  });
+</script>
+</body>
+</html>
